@@ -1,0 +1,19 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          114.1430347,
+          22.287041199999997
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "address": "坤记煲仔小菜 西環, 263號 Queen's Rd W, Sai Ying Pun, 香港",
+        "name": "香港Trip"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

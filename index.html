@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YumMap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 全螢幕進場 Overlay -->
+  <div id="landingOverlay" class="landing-overlay">
+    <div class="landing-content">
+      <div class="landing-brand">
+        <div class="landing-logo">🍽️</div>
+        <h1 class="landing-title">YumMap</h1>
+        <p class="landing-subtitle">午餐・下午茶・聚餐・一鍵搞定</p>
+      </div>
+
+      <div class="landing-divider"></div>
+      <div class="landing-prompt">Select Your Area · 選擇用餐區域</div>
+
+      <div class="landing-districts">
+        <button class="district-card" onclick="selectDistrict('南港區')">
+          <div class="district-card-img district-card-img--illus">
+            <img src="food-pic-1.svg.svg" alt="南港區" class="district-illus" />
+          </div>
+          <div class="district-card-body">
+            <span class="district-name">南港區</span>
+            <span class="district-tagline">展覽商圈・南港車站</span>
+            <span class="district-count" id="count-南港區">載入中…</span>
+          </div>
+        </button>
+        <button class="district-card" onclick="selectDistrict('內湖區')">
+          <div class="district-card-img district-card-img--illus">
+            <img src="food-pic-2.svg.svg" alt="內湖區" class="district-illus" />
+          </div>
+          <div class="district-card-body">
+            <span class="district-name">內湖區</span>
+            <span class="district-tagline">內科商圈・碧湖公園</span>
+            <span class="district-count" id="count-內湖區">載入中…</span>
+          </div>
+        </button>
+        <button class="district-card" onclick="selectDistrict('信義區')">
+          <div class="district-card-img district-card-img--illus">
+            <img src="food-pic-3.svg.svg" alt="信義區" class="district-illus" />
+          </div>
+          <div class="district-card-body">
+            <span class="district-name">信義區</span>
+            <span class="district-tagline">台北101・信義商圈</span>
+            <span class="district-count" id="count-信義區">載入中…</span>
+          </div>
+        </button>
+        <button class="district-card" onclick="selectDistrict('中山區')">
+          <div class="district-card-img district-card-img--illus">
+            <img src="food-pic-4.svg.svg" alt="中山區" class="district-illus" />
+          </div>
+          <div class="district-card-body">
+            <span class="district-name">中山區</span>
+            <span class="district-tagline">赤峰街・林森北路</span>
+            <span class="district-count" id="count-中山區">載入中…</span>
+          </div>
+        </button>
+        <button class="district-card district-card--all" onclick="selectDistrict('')">
+          <div class="district-card-img">🗺️</div>
+          <div class="district-card-body">
+            <span class="district-name">全部瀏覽</span>
+            <span class="district-tagline">不限區域，查看所有 <span id="count-all">—</span> 家餐廳</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 頂部標題 -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <h1>🍽️ YumMap</h1>
+        <p>午餐 · 下午茶 · 聚餐 · 一鍵搞定</p>
+      </div>
+      <div class="header-right">
+        <div id="headerStats" class="header-stats"></div>
+        <button class="btn-switch-district" onclick="showLanding()">切換區域</button>
+        <button class="btn-excel-import" onclick="exportToExcel()" title="匯出目前清單為 Excel">📊 匯出 Excel</button>
+        <button class="btn-header-add" onclick="openAddForm()">＋ 新增餐廳</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 新增 / 編輯 Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle">＋ 新增餐廳</h2>
+        <button class="modal-close" onclick="closeForm()">✕</button>
+      </div>
+      <form id="foodForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">店名 *</label>
+            <input type="text" id="name" placeholder="例：永寶餐廳" required />
+          </div>
+          <div class="form-group">
+            <label for="mealType">用餐時段 *</label>
+            <select id="mealType" required>
+              <option value="">請選擇</option>
+              <option value="早餐">☀️ 早餐</option>
+              <option value="午餐">🍱 午餐</option>
+              <option value="下午茶">🫖 下午茶</option>
+              <option value="晚餐">🌙 晚餐</option>
+              <option value="早午餐">🥞 早午餐</option>
+              <option value="聚餐">🥂 聚餐 / 包廂</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="occasion">適合場合</label>
+            <select id="occasion">
+              <option value="">請選擇</option>
+              <option value="部門聚餐">👥 部門聚餐</option>
+              <option value="商務聚餐">🤝 商務聚餐</option>
+              <option value="同事生日">🎂 同事生日</option>
+              <option value="平日午餐">🥗 平日午餐</option>
+              <option value="不限">✨ 不限</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dietary">飲食需求</label>
+            <select id="dietary">
+              <option value="">請選擇</option>
+              <option value="葷食為主">🍖 葷食為主</option>
+              <option value="素食友善">🥗 素食友善</option>
+              <option value="全素 / 純素">🌿 全素 / 純素</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="category">料理類型</label>
+            <select id="category">
+              <option value="">請選擇</option>
+              <option value="台灣料理">台灣料理</option>
+              <option value="日式料理">日式料理</option>
+              <option value="韓式料理">韓式料理</option>
+              <option value="中式料理">中式料理</option>
+              <option value="西式料理">西式料理</option>
+              <option value="義式料理">義式料理</option>
+              <option value="泰式料理">泰式料理</option>
+              <option value="咖啡甜點">咖啡甜點</option>
+              <option value="火鍋燒烤">火鍋燒烤</option>
+              <option value="便當自助">便當 / 自助餐</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">電話</label>
+            <input type="tel" id="phone" placeholder="例：02-2700-0000" />
+          </div>
+          <div class="form-group">
+            <label>人均消費（元）</label>
+            <div class="price-range-row">
+              <input type="number" id="priceMin" placeholder="最低 例：350" min="0" />
+              <span class="price-range-sep">～</span>
+              <input type="number" id="priceMax" placeholder="最高 例：600" min="0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="hours">營業時間（自由文字）</label>
+          <input type="text" id="hours" placeholder="例：11:00-14:30 / 17:30-21:00，週一公休" />
+        </div>
+
+        <div class="form-group full-width">
+          <label>結構化營業時段（用於自動判斷營業中／打烊）</label>
+          <div class="hours-grid">
+            <div class="hours-row">
+              <span class="hours-label">平日 一～五</span>
+              <input type="time" id="wdOpen"  class="hours-time" />
+              <span class="hours-sep">至</span>
+              <input type="time" id="wdClose" class="hours-time" />
+              <label class="hours-closed-chk"><input type="checkbox" id="wdClosed" /> 公休</label>
+            </div>
+            <div class="hours-row">
+              <span class="hours-label">假日 六～日</span>
+              <input type="time" id="weOpen"  class="hours-time" />
+              <span class="hours-sep">至</span>
+              <input type="time" id="weClose" class="hours-time" />
+              <label class="hours-closed-chk"><input type="checkbox" id="weClosed" /> 公休</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>付款方式</label>
+          <div class="payment-group">
+            <label class="payment-option"><input type="checkbox" name="payment" value="現金" /> 💵 現金</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Line Pay" /> 💚 Line Pay</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="街口支付" /> 🔵 街口支付</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Apple Pay" /> 🍎 Apple Pay</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="台灣Pay" /> 🇹🇼 台灣Pay</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="信用卡" /> 💳 信用卡</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Visa" /> 💳 Visa</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Mastercard" /> 💳 MC</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Jcb" /> 💳 JCB</label>
+            <label class="payment-option"><input type="checkbox" name="payment" value="Amex" /> 💳 Amex</label>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="address">地址</label>
+          <input type="text" id="address" placeholder="例：台北市內湖區瑞光路106號" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mrtStation">最近捷運站</label>
+            <input type="text" id="mrtStation" placeholder="例：南港軟體園區站" />
+          </div>
+          <div class="form-group">
+            <label for="walkTime">步行時間（分鐘）</label>
+            <input type="number" id="walkTime" placeholder="例：8" min="1" max="60" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>評分</label>
+            <div class="star-input" id="starInput">
+              <span class="star" data-value="1">★</span>
+              <span class="star" data-value="2">★</span>
+              <span class="star" data-value="3">★</span>
+              <span class="star" data-value="4">★</span>
+              <span class="star" data-value="5">★</span>
+            </div>
+            <input type="hidden" id="rating" value="0" />
+          </div>
+          <div class="form-group">
+            <label>需要訂位？</label>
+            <div class="toggle-group">
+              <label class="toggle-option"><input type="radio" name="reservation" value="不需要" checked /> 不需要</label>
+              <label class="toggle-option"><input type="radio" name="reservation" value="建議訂位" /> 建議訂位</label>
+              <label class="toggle-option"><input type="radio" name="reservation" value="必須訂位" /> 必須訂位</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>取餐方式（複選）</label>
+          <div class="toggle-group">
+            <label class="toggle-option"><input type="checkbox" name="visited" value="自取" /> 🏃 自取</label>
+            <label class="toggle-option"><input type="checkbox" name="visited" value="外送" /> 🛵 外送</label>
+            <label class="toggle-option"><input type="checkbox" name="visited" value="Ubereats" /> 🟢 Ubereats</label>
+            <label class="toggle-option"><input type="checkbox" name="visited" value="Foodpanda" /> 🐼 Foodpanda</label>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="restaurantUrl">餐廳網頁（官網 / 食評 / Google Map）</label>
+          <input type="url" id="restaurantUrl" placeholder="例：https://www.instagram.com/... 或食評網址" />
+        </div>
+
+        <div class="form-group full-width">
+          <label for="bookingUrl">訂位網址</label>
+          <input type="url" id="bookingUrl" placeholder="例：https://inline.app/booking/..." />
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">餐廳特色備註（必點菜色、停車、氛圍等）</label>
+          <textarea id="notes" placeholder="例：必點招牌烤鴨、停車方便、適合商務聚餐"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel-modal" onclick="closeForm()">取消</button>
+          <button type="submit" class="btn-add" id="submitBtn">加入清單</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <main>
+    <!-- 一鍵匯入橫幅（自動匯入後隱藏） -->
+    <div id="importBanner" class="import-banner" style="display:none"></div>
+
+    <!-- 篩選列 -->
+    <div class="filter-section">
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍 搜尋店名..." />
+        <select id="filterMealType">
+          <option value="">餐點種類</option>
+          <option value="早餐">☀️ 早餐</option>
+          <option value="午餐">🍱 午餐</option>
+          <option value="下午茶">🫖 下午茶</option>
+          <option value="晚餐">🌙 晚餐</option>
+          <option value="早午餐">🥞 早午餐</option>
+          <option value="聚餐">🥂 聚餐</option>
+        </select>
+        <select id="filterOccasion">
+          <option value="">適合場合</option>
+          <option value="部門聚餐">👥 部門聚餐</option>
+          <option value="商務聚餐">🤝 商務聚餐</option>
+          <option value="同事生日">🎂 同事生日</option>
+          <option value="平日午餐">🥗 平日午餐</option>
+        </select>
+        <select id="filterVisited">
+          <option value="">取餐方式</option>
+          <option value="自取">🏃 自取</option>
+          <option value="外送">🛵 外送</option>
+          <option value="Ubereats">🟢 Ubereats</option>
+          <option value="Foodpanda">🐼 Foodpanda</option>
+        </select>
+        <select id="filterDietary">
+          <option value="">飲食需求</option>
+          <option value="葷食為主">🍖 葷食為主</option>
+          <option value="素食友善">🥗 素食友善</option>
+          <option value="全素 / 純素">🌿 全素 / 純素</option>
+        </select>
+        <select id="filterWalk">
+          <option value="0">🚇 步行時間</option>
+          <option value="5">🚶 5 分鐘內</option>
+          <option value="10">🚶 10 分鐘內</option>
+          <option value="15">🚶 15 分鐘內</option>
+        </select>
+        <span id="foodCount" class="food-count"></span>
+      </div>
+      <div class="filter-budget-bar">
+        <span class="filter-budget-label">預算上限</span>
+        <input type="range" id="filterBudget" min="0" max="2000" step="100" value="2000" />
+        <span id="budgetVal" class="filter-budget-val">不限</span>
+      </div>
+    </div>
+
+    <!-- 兩欄主版面 -->
+    <div class="main-layout">
+
+      <!-- 左欄：餐廳清單 -->
+      <div class="panel-left">
+        <div id="foodList" class="food-list"></div>
+        <div id="emptyState" class="empty-state">
+          <p>🍽️ 還沒有任何餐廳</p>
+          <p>點右上角「新增餐廳」開始吧！</p>
+        </div>
+      </div>
+
+      <!-- 右欄：詳情面板 -->
+      <div class="panel-right" id="detailPanel">
+        <div class="detail-placeholder" id="detailPlaceholder"></div>
+        <div class="detail-content" id="detailContent"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="import-restaurants.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
